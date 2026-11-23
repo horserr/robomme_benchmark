@@ -13,7 +13,7 @@ and runtime limits. Saved agent-facing prompts are in [`prompts/current`](prompt
 Use the [development interface](../../../doc/robomme_plus/agentic_development.md)
 for a minimal preparation command, seed-selectable API, logging requirements and
 audits. Keep your own harness; run the simulator service outside the agent workspace.
-The [audit walkthrough](../../../doc/robomme_plus/auditing.md) provides prompts
+The [audit walkthrough](../../../doc/robomme_plus/agentic_development.md#step-7-audit) provides prompts
 for the harness review and completed-development review.
 
 ## Setup
@@ -44,8 +44,7 @@ Credentials remain outside agent containers. Neither method uses our CaP code.
 
 ## Develop and evaluate
 
-Download the [final training H5 data](https://huggingface.co/datasets/Yinpei/robomme_plus_data_h5),
-pin the downloaded revision in your run manifest, then:
+Download the [training H5 data](https://huggingface.co/datasets/Yinpei/robomme_plus_data_h5), then:
 
 ```bash
 python -m benchmark_io.prepare_unified prepare \
@@ -53,21 +52,14 @@ python -m benchmark_io.prepare_unified prepare \
 python -m benchmark_io.watch_unified --root "<RUN_ROOT>"
 ```
 
-Preparation pins the benchmark, 50 recordings, protocol, runtime and image
+Preparation saves the benchmark, 50 recordings, protocol, runtime and image
 digest without API calls or simulator starts. New studies create **6 configurations**:
-2 methods × (`demo-only` at 0; each interaction setting at 10).
+2 methods × (`Demo-only` at 0; each interaction setting at 10).
 Each configuration evaluates 800 episodes: 4,800 tests across both methods.
-Existing studies retain their pinned configuration list, including historical budgets.
+Use `--settings interaction-only hybrid --budgets 10` to develop the four released configurations.
 
-Use these setting names in commands and directories:
-
-| Setting | Main budget |
-| --- | --- |
-| `demo-only` | 0 |
-| `interaction-only` | 10 |
-| `demo&interaction` | 10 |
-
-In shell commands, write `--setting 'demo&interaction'` with quotes.
+Setting names in commands are case-insensitive. Saved ledgers store `Hybrid` under
+its original identifier, `demo&interaction`.
 
 Worker allocation is configurable. Evaluation requires frozen policies.
 Example `<RUN_ROOT>/schedule_policy.json` for two GPUs:
@@ -76,11 +68,20 @@ Example `<RUN_ROOT>/schedule_policy.json` for two GPUs:
 {
   "development_workers_total": 6,
   "development_workers_per_gpu": 3,
+  "development_task_workers": {"aspire": 2, "rax": 4},
   "evaluation_workers_total": 16,
   "evaluation_workers_by_gpu": {"0": 8, "1": 8},
   "evaluation_mode": "after_all_development"
 }
 ```
+
+Development workers above are configuration jobs. `development_task_workers`
+sets task concurrency within each configuration (default 1); all share its ledger.
+
+Evaluation supports up to 24 workers. To update scheduling code after policies
+are frozen, save a separate operator snapshot containing `benchmark_io/` and pass
+`--scheduler-code <SCHEDULER_DIR>` to `watch_unified`. Episode workers continue
+using the study's frozen runtime; keep the scheduler snapshot with the run logs.
 
 The default episode selection covers all 800 tests. Create `STOP` to stop
 dispatching; running workers remain owned by the monitor. Limits are in
@@ -92,11 +93,11 @@ use each method's `eval_plus.py`.
 Under `METHOD/SETTING/Rn/`: `study/` contains metadata/attempts;
 `development/` contains native commands, transcripts, code and training rollouts;
 `development_api/` contains usage/cost records; `evaluation/` contains frozen
-policies, test results and logs. R0/R10 save full test media; R5 saves logs.
-R1/R3/R5 results remain optional, with their original budgets and assignments.
+policies, test results and logs. Runs with 0 or 10 rollouts save full test media; 5-rollout runs save logs.
+The packaged ASPIRE/RAX policies and result tables contain only R10.
 All development history is retained. `progress.json` aggregates the study.
 
-See [Preserve evidence](../../../doc/robomme_plus/agentic_development.md#preserve-evidence)
+See [Develop and keep the record](../../../doc/robomme_plus/agentic_development.md#step-5-develop-and-keep-the-record)
 for what to publish; raw trajectories, images and videos are optional.
 
 Report demo use, actual attempts and simulator steps per task, and separate

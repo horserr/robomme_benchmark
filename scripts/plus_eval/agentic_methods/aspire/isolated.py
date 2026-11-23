@@ -4,6 +4,7 @@ Only sensor/robot contract data traverses JSON RPC. The worker cannot import the
 simulator, reset it, access host files, or reach a network/provider credential.
 """
 import json
+import hashlib
 import os
 from pathlib import Path
 import shutil
@@ -29,6 +30,15 @@ from .sam3_reliability import ReliableSam3Provider
 
 HERE = Path(__file__).resolve().parent
 UPSTREAM = HERE / 'ASPIRE/src/cap_harness'
+
+
+def recorder_termination_reason(reason, *, task_success):
+    """Translate operator stop labels to the upstream artifact schema."""
+    if reason == 'episode_terminated':
+        return 'task_succeeded' if task_success else 'environment_terminated'
+    if reason == 'episode_truncated':
+        return 'environment_truncated'
+    return reason
 
 
 def communicate_until_episode_end(process, episode, stop_worker, *, timeout=3600, terminal_grace=1, watchdog=None):
@@ -139,7 +149,8 @@ def run_program(*, study_root, output_root, task, episode, code, image,
     source.write_text(code)
     recorder.save_program(source)
     adapter = RoboMMEPlusAdapter(study_root=study_root, output_root=recorder.root / 'native',
-                                 purpose=purpose, run_observer=recorder)
+                                 purpose=purpose, run_observer=recorder,
+                                 policy_revision=hashlib.sha256(code.encode()).hexdigest() if dataset == 'train' else None)
     if study_override is not None:
         adapter.study = study_override
     execution = None
@@ -233,7 +244,9 @@ def run_program(*, study_root, output_root, task, episode, code, image,
             success = adapter.check_success()
         adapter.close()
         recorder.finalize(program_ok=bool(execution and execution.ok), task_success=success,
-            termination_reason=terminal_stop or ('harness_error' if error else ('program_error' if execution and not execution.ok else 'program_completed')),
+            termination_reason=recorder_termination_reason(
+                terminal_stop or ('harness_error' if error else ('program_error' if execution and not execution.ok else 'program_completed')),
+                task_success=success),
             error=error, program_result=execution.result if execution else None)
     provider_failures = sam3.infrastructure_failures if sam3 else 0
     return dict(program_ok=bool(execution and execution.ok), task_success=success,

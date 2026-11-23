@@ -9,27 +9,27 @@ Each method link below provides setup and running instructions.
 
 | Method | Setting | Successes (rate) |
 |---|---|---:|
-| [Embodied Astra](agentic_methods/astra/embodied/README.md) | `zero-shot` | 194/800 (24.25%) |
-| [One-shot Astra](agentic_methods/astra/embodied/README.md#one-shot) | `demo-only` | 281/800 (35.13%) |
-| [3-tier Astra](agentic_methods/astra/three_tier/README.md) | `zero-shot` | 70/800 (8.75%) |
-| [FrameSamp+Modul](non_agentic_methods/framesamp_modul/README.md) | `zero-shot` | 19/800 (2.38%) |
-| [SimpleMemVLA](non_agentic_methods/simplememvla/README.md) | `zero-shot` | 14/800 (1.75%) |
-| [PonderPounce](non_agentic_methods/ponderpounce/README.md) | `zero-shot` | 20/800 (2.50%) |
+| [Embodied Astra](agentic_methods/astra/embodied/README.md) | `Zero-shot` | 194/800 (24.25%) |
+| [One-shot Astra](agentic_methods/astra/embodied/README.md#one-shot) | `Demo-only` | 281/800 (35.13%) |
+| [3-tier Astra](agentic_methods/astra/three_tier/README.md) | `Zero-shot` | 70/800 (8.75%) |
+| [FrameSamp+Modul](non_agentic_methods/framesamp_modul/README.md) | `Zero-shot` | 19/800 (2.38%) |
+| [SimpleMemVLA](non_agentic_methods/simplememvla/README.md) | `Zero-shot` | 14/800 (1.75%) |
+| [PonderPounce](non_agentic_methods/ponderpounce/README.md) | `Zero-shot` | 20/800 (2.50%) |
 
 ## Agentic adaptation
 
-The interaction settings allow at most **10 development rollouts per task**.
-ASPIRE and RAX develop each budget independently. The main leaderboard uses R10;
-all results use 800 test episodes.
+`Demo-only` uses the 50 released demonstrations and no simulator rollouts. The
+interaction settings use at most **10 development rollouts per task**, shared across
+training seeds. The packaged solutions cover the R10 runs.
 
 | Setting | Budget | [ASPIRE](agentic_methods/aspire/README.md) | [RAX](agentic_methods/rax/README.md) |
 |---|---|---:|---:|
-| `demo-only` | 0 | 136/800 (17.00%) | 152/800 (19.00%) |
-| `interaction-only` | 10 | 341/800 (42.63%) | 312/800 (39.00%) |
-| `demo&interaction` | 10 | 279/800 (34.88%) | 337/800 (42.13%) |
+| `Demo-only` | 0 | 140/800 (17.50%) | 139/800 (17.38%) |
+| `Interaction-only` | 10 | 302/800 (37.75%) | 372/800 (46.50%) |
+| `Hybrid` | 10 | 342/800 (42.75%) | 327/800 (40.88%) |
 
-[Optional R1/R3/R5 results](../../doc/robomme_plus/robomme_plus_baseline_results.md#optional-interaction-budgets)
-remain documented, with frozen solutions and JSON summaries.
+The submissions include the [ASPIRE](<../../doc/robomme_plus/submission/aspire-plus (eval_by_RoboMME_team).md#agentic-development-audit-record>)
+and [RAX](<../../doc/robomme_plus/submission/rax-plus (eval_by_RoboMME_team).md#agentic-development-audit-record>) audit records.
 
 Final summaries: [model baselines](results/model_baselines.json) ·
-[ASPIRE/RAX](results/agentic_20261118.json).
+[ASPIRE/RAX](results/agentic_current.json).

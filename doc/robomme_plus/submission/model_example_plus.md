@@ -1,31 +1,45 @@
 # RoboMME-Plus submission templates
 
 Follow the [evaluation protocol](../../../src/robomme_plus/README.md#evaluation-protocol).
-Copy one section per setting you report and replace the bracketed placeholders.
+Copy the [template](#template) into a new Markdown file, keep only the rows and
+columns for the settings you report, and replace the bracketed placeholders.
 Either track may use any setting. Each result covers all **800 test episodes
 (16 tasks × 50)**. The leaderboard uses 10 rollouts per task for interaction
-settings; 1, 3 and 5 rollouts are optional.
+settings. Results with other rollout budgets are optional.
 
-Report success rates as percentages with two decimal places. Report API costs in
-USD, development and evaluation separately; use N/A when no paid API is used.
-Label estimates and identify missing usage; incomplete required records block an audit PASS.
+Report success rates as percentages with two decimal places. Only simulator success
+counts; failures, timeouts, model stops and errors stay in the denominator. Report
+estimated API costs in USD, development and evaluation separately; a reasonable
+estimate (for example rounded to the nearest $10, excluding local compute) is
+enough. Use N/A when no paid API is used.
 Leave evaluation scores and costs PENDING until team verification is complete.
 
 ## What to submit
 
-Open a pull request containing this Markdown. Link every artifact at a pinned
-revision (a commit or dataset revision, not a moving branch).
+Open a pull request containing this Markdown. Public code, method-specific
+checkpoints and at least one paper, blog post or project website are required for
+PR acceptance. Agentic development also requires public release of the complete
+development logs and the final solutions used for evaluation. Link released
+artifacts at fixed revisions.
+
+**Keep this Markdown self-contained.** Put the results, costs and the full audit
+report in this file. Link only to external artifacts: code, checkpoints, final
+solutions and development logs.
 
 | Item | Required for | Contents |
 | --- | --- | --- |
-| Code | Every submission | Runnable method and frozen policy revision, including prompts, tools, dependencies and installation/evaluation commands |
-| Usage log | Any Plus development rollouts | Per-task starts, failed/incomplete starts and simulator steps for each budget |
-| Freeze manifest | Agentic development | Content hashes of the frozen programs, prompts, tools and harness, created before the first test episode |
-| Development logs | Agentic development | Prompts, visible responses, commands/tool calls and text outputs, plus every code revision, including failed and interrupted work; see [Preserve evidence](../agentic_development.md#preserve-evidence) |
-| Audit record | Agentic development | Both audits, filled in at the [bottom of this file](#agentic-development-audit-record) |
+| Code and checkpoints | Every submission | Public runnable code and all method-specific checkpoints at fixed revisions, including prompts, tools, dependencies and installation/evaluation commands; methods without learned weights provide their final programs and prompts |
+| Method description | Every submission | At least one public paper, blog post or project website explaining the method |
+| Final evaluation solutions | Agentic development | Public final task programs, prompts, skills and tools, with their dependency versions and evaluation commands |
+| Usage log | Simulator rollouts without agentic development (for example RL fine-tuning in `Interaction-only`) | Per-task simulator starts for each budget; agentic development records these in its development logs instead |
+| Development logs | Agentic development | Public complete prompts, visible responses, commands/tool calls and text outputs, plus every code/prompt revision, including failed and interrupted work, and every simulator start; see [Develop and keep the record](../agentic_development.md#step-5-develop-and-keep-the-record) |
+| Audit record | Agentic development | The development audit, filled in at the [bottom of this file](#agentic-development-audit-record) |
 
-The last three items apply to [agentic development](../../../src/robomme_plus/README.md#evaluation-protocol).
-Otherwise mark them N/A.
+Agentic development
+includes agent-generated task solutions, task-specific prompts learned from
+rollouts, and self-improving agents. Standard policy fine-tuning and direct control
+with general prompts (such as Embodied Astra) mark the agentic-development-only
+items N/A unless they also use agentic development.
 
 - **Development trajectories and media are optional uploads.**
   Raw action/state trajectories, images and rollout videos may be omitted.
@@ -34,325 +48,183 @@ Otherwise mark them N/A.
   Retain source identifiers and hashes for omitted payloads; preserve the code,
   commands, failed attempts and result records.
 
-**Verification.** The RoboMME team runs the submitted frozen code to verify its
-performance, then updates the leaderboard. For agentic development, both audits
-must conclude **PASS** before the leaderboard update; test-dependent checks may
-remain PENDING until team verification. Methods without agentic development mark them N/A.
-Recover missing evidence or fix confirmed breaches and rerun the affected
-development. Disclose self-reviews.
+**Evaluation access.** If testing requires a closed API or gated model, email
+[robomme2026@gmail.com](mailto:robomme2026@gmail.com) after opening the PR. Include its link,
+confirm that the RoboMME team has the required access, and arrange private delivery
+of a dedicated API credential with enough quota for one full **800-episode
+evaluation per submitted setting**. Never put credentials in the PR. Proprietary
+model weights may be accessed through their API; credentials are unnecessary for
+models used only during development.
 
+**Verification.** The RoboMME team re-runs the submitted final code on all 800
+tests and uses that run for the leaderboard. For agentic development, the audit
+must conclude **PASS** first; methods without agentic development mark it N/A.
+Disclose self-reviews.
 
-**Track (select one):**
+### Tracks and settings
 
-- [ ] Non-Agentic Track: fine-tuned robot policies (e.g., VLAs, WAMs) that directly predict actions.
-- [ ] Agentic Track: systems using pretrained foundation models for planning, action, or coding.
+| Track | Meaning |
+| --- | --- |
+| Non-Agentic | Fine-tuned robot policies (e.g., VLAs, WAMs) that directly predict actions |
+| Agentic | Systems using pretrained foundation models for planning, action or coding |
 
+| Setting | Adapts with | Rollouts per task |
+| --- | --- | ---: |
+| `Zero-shot` | Nothing from Plus: test directly, or develop only on original RoboMME | 0 |
+| `Demo-only` | Released offline demonstrations, without Plus simulator interactions | 0 |
+| `Interaction-only` | Training-seed interactions, without released demonstrations | 10 |
+| `Hybrid` | Released demonstrations and training-seed interactions | 10 |
 
-## 1. `zero-shot`
+### Smaller rollout budgets
 
-Test the policy directly, or develop it only on original RoboMME, without Plus adaptation.
+Results with fewer than 10 rollouts per task are optional and do not enter the
+leaderboard; the ASPIRE and RAX references use 1, 3 and 5. For budget R, either run
+a separate development capped at R attempts per task, or use each task's code as
+saved before its (R+1)th start in a 10-attempt run, and state which. Each budget
+evaluates all 800 tests and needs its own audit. Test outcomes cannot select checkpoints.
 
-### [Model / framework name]
+### Audit record
 
-[Briefly describe the model or agentic framework and its memory mechanism.]
+Agentic development pastes one full report per setting and budget under **Full
+audit reports**, using the prompt in [How to audit](../agentic_development.md#step-7-audit).
+Methods without agentic development replace the section's content with "Not
+applicable: no agentic development."
 
-- **Track:** [Non-Agentic / Agentic]
-- **Paper:** [Paper](PAPER_URL) / N/A
-- **Website:** [Project website](WEBSITE_URL) / N/A
-- **Blog:** [Blog post](BLOG_URL) / N/A
-- **Code:** [Repository and frozen revision](CODE_URL)
-- **Development logs:** [Public archive](DEVELOPMENT_LOGS_URL) / N/A
-- **Model / version:** [CHECKPOINT OR API MODEL AND VERSION]
-- **Parameters (Non-Agentic track):** [SIZE IN B / N/A]
-- **Total evaluation API cost (USD):** [COST / N/A]
+## Template
 
-| Suite | Task | Successes | Success (%) |
-| --- | --- | --- | --- |
-| Counting | BinFill | ___/50 |  |
-| Counting | PickXtimes | ___/50 |  |
-| Counting | SwingXtimes | ___/50 |  |
-| Counting | StopCube | ___/50 |  |
-| Permanence | VideoUnmask | ___/50 |  |
-| Permanence | VideoUnmaskSwap | ___/50 |  |
-| Permanence | ButtonUnmask | ___/50 |  |
-| Permanence | ButtonUnmaskSwap | ___/50 |  |
-| Reference | PickHighlight | ___/50 |  |
-| Reference | VideoRepick | ___/50 |  |
-| Reference | VideoPlaceButton | ___/50 |  |
-| Reference | VideoPlaceOrder | ___/50 |  |
-| Imitation | MoveCube | ___/50 |  |
-| Imitation | InsertPeg | ___/50 |  |
-| Imitation | PatternLock | ___/50 |  |
-| Imitation | RouteStick | ___/50 |  |
-| **Overall** | **All tasks** | **___/800** |  |
+# [METHOD] on RoboMME-Plus
 
+[One paragraph: the model or agentic framework and its memory mechanism.]
 
-## 2. `demo-only`
+- **Track:** [Agentic / Non-Agentic].
+- **Code:** [Code](CODE_URL) · [Run instructions](RUN_INSTRUCTIONS_URL).
+- **Final evaluation solutions:** [Final solutions](SOLUTION_URL) / N/A (no agentic development).
+- **Development logs:** [Public archive](DEVELOPMENT_LOGS_URL) / N/A (no agentic development).
+- **Paper / website / blog:** [Paper](PAPER_URL) · [Website](WEBSITE_URL) · [Blog](BLOG_URL)
+- **Model / checkpoint:** [CHECKPOINT OR API MODEL AND VERSION, AT A FIXED REVISION]
+- **Parameters:** [SIZE IN B, INCLUDING FROZEN PARAMETERS; SHARED WEIGHTS COUNTED ONCE] / N/A (API model)
+- **Evaluated by:** [TEAM]
 
-Adapt using released offline demonstrations, without Plus simulator interactions.
+## Results
 
-### [Model / framework name]
+### Overall results
 
-[Briefly describe the model or agentic framework and its memory mechanism.]
+| Setting | Rollouts per task | Success | Development starts | Development API cost | Evaluation API cost |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `Zero-shot` | 0 | ___/800 (___%) | 0 | [COST / N/A] | [COST / N/A] |
+| `Demo-only` | 0 | ___/800 (___%) | 0 | [COST / N/A] | [COST / N/A] |
+| `Interaction-only` | 10 | ___/800 (___%) | [STARTS] | [COST / N/A] | [COST / N/A] |
+| `Hybrid` | 10 | ___/800 (___%) | [STARTS] | [COST / N/A] | [COST / N/A] |
 
-- **Track:** [Non-Agentic / Agentic]
-- **Paper:** [Paper](PAPER_URL) / N/A
-- **Website:** [Project website](WEBSITE_URL) / N/A
-- **Blog:** [Blog post](BLOG_URL) / N/A
-- **Code:** [Repository and frozen revision](CODE_URL)
-- **Development logs:** [Public archive](DEVELOPMENT_LOGS_URL) / N/A
-- **Model / version:** [CHECKPOINT OR API MODEL AND VERSION]
-- **Parameters (Non-Agentic track):** [SIZE IN B / N/A]
-- **Adaptation:** [BRIEF DESCRIPTION]
-- **Demo use:** [SELECTION AND MODALITIES]
-- **Development API cost (USD):** [COST / N/A]
-- **Total evaluation API cost (USD):** [COST / N/A]
+Outcomes: [SUCCESSES, FAILURES AND TIMEOUTS, PER SETTING].
 
-| Suite | Task | Successes | Success (%) |
-| --- | --- | --- | --- |
-| Counting | BinFill | ___/50 |  |
-| Counting | PickXtimes | ___/50 |  |
-| Counting | SwingXtimes | ___/50 |  |
-| Counting | StopCube | ___/50 |  |
-| Permanence | VideoUnmask | ___/50 |  |
-| Permanence | VideoUnmaskSwap | ___/50 |  |
-| Permanence | ButtonUnmask | ___/50 |  |
-| Permanence | ButtonUnmaskSwap | ___/50 |  |
-| Reference | PickHighlight | ___/50 |  |
-| Reference | VideoRepick | ___/50 |  |
-| Reference | VideoPlaceButton | ___/50 |  |
-| Reference | VideoPlaceOrder | ___/50 |  |
-| Imitation | MoveCube | ___/50 |  |
-| Imitation | InsertPeg | ___/50 |  |
-| Imitation | PatternLock | ___/50 |  |
-| Imitation | RouteStick | ___/50 |  |
-| **Overall** | **All tasks** | **___/800** |  |
+### Per-task success
 
+| Suite | Task | `Zero-shot` | `Demo-only` | `Interaction-only` | `Hybrid` |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Counting | BinFill | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
+| Counting | PickXtimes | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
+| Counting | SwingXtimes | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
+| Counting | StopCube | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
+| Permanence | VideoUnmask | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
+| Permanence | VideoUnmaskSwap | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
+| Permanence | ButtonUnmask | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
+| Permanence | ButtonUnmaskSwap | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
+| Reference | PickHighlight | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
+| Reference | VideoRepick | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
+| Reference | VideoPlaceButton | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
+| Reference | VideoPlaceOrder | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
+| Imitation | MoveCube | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
+| Imitation | InsertPeg | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
+| Imitation | PatternLock | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
+| Imitation | RouteStick | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
+| **Overall** | **All tasks** | **___/800 (___%)** | **___/800 (___%)** | **___/800 (___%)** | **___/800 (___%)** |
 
-## 3. `interaction-only`
+### Reference results with fewer rollouts
 
-Adapt through training-seed interactions, without released offline demonstrations.
+| Setting | [N] rollouts | [N] rollouts | [N] rollouts |
+| --- | ---: | ---: | ---: |
+| `Interaction-only` | ___/800 (___%) | ___/800 (___%) | ___/800 (___%) |
+| `Hybrid` | ___/800 (___%) | ___/800 (___%) | ___/800 (___%) |
 
-### [Model / framework name]
-
-[Briefly describe the model or agentic framework and its memory mechanism.]
-
-- **Track:** [Non-Agentic / Agentic]
-- **Paper:** [Paper](PAPER_URL) / N/A
-- **Website:** [Project website](WEBSITE_URL) / N/A
-- **Blog:** [Blog post](BLOG_URL) / N/A
-- **Code:** [Repository and frozen revision](CODE_URL)
-- **Development logs:** [Public archive](DEVELOPMENT_LOGS_URL) / N/A
-- **Model / version:** [CHECKPOINT OR API MODEL AND VERSION]
-- **Parameters (Non-Agentic track):** [SIZE IN B / N/A]
-- **Adaptation:** [BRIEF DESCRIPTION]
-- **Usage log:** [LINK TO ATTEMPTS AND SIMULATOR STEPS PER TASK, BY BUDGET]
-- **Development API cost (USD):** 10 rollouts: [COST / N/A]
-- **Total evaluation API cost (USD):** 10 rollouts: [COST / N/A]
-
-| Suite | Task | Successes | Success with 10 rollouts (%) |
-| --- | --- | --- | --- |
-| Counting | BinFill |  |  |
-| Counting | PickXtimes |  |  |
-| Counting | SwingXtimes |  |  |
-| Counting | StopCube |  |  |
-| Permanence | VideoUnmask |  |  |
-| Permanence | VideoUnmaskSwap |  |  |
-| Permanence | ButtonUnmask |  |  |
-| Permanence | ButtonUnmaskSwap |  |  |
-| Reference | PickHighlight |  |  |
-| Reference | VideoRepick |  |  |
-| Reference | VideoPlaceButton |  |  |
-| Reference | VideoPlaceOrder |  |  |
-| Imitation | MoveCube |  |  |
-| Imitation | InsertPeg |  |  |
-| Imitation | PatternLock |  |  |
-| Imitation | RouteStick |  |  |
-| **Overall** | **All tasks** |  |  |
-
+**Budget construction:** [SEPARATE DEVELOPMENT RUNS / CODE SAVED BEFORE EACH TASK'S (R+1)TH START]
 
 <details>
-<summary>Optional results: 1, 3 and 5 rollouts per task</summary>
+<summary>Per-task success with [N] rollouts</summary>
 
-Each budget evaluates all 800 tests. Report successes and success rates per task;
-use N/A for budgets you do not report.
-
-| Suite | Task | 1 rollout | 3 rollouts | 5 rollouts |
-| --- | --- | --- | --- | --- |
-| Counting | BinFill | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Counting | PickXtimes | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Counting | SwingXtimes | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Counting | StopCube | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Permanence | VideoUnmask | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Permanence | VideoUnmaskSwap | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Permanence | ButtonUnmask | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Permanence | ButtonUnmaskSwap | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Reference | PickHighlight | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Reference | VideoRepick | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Reference | VideoPlaceButton | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Reference | VideoPlaceOrder | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Imitation | MoveCube | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Imitation | InsertPeg | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Imitation | PatternLock | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Imitation | RouteStick | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| **Overall** | **All tasks** | **___/800 (___%)** | **___/800 (___%)** | **___/800 (___%)** |
-
-| Budget per task | Development API cost (USD) | Evaluation API cost (USD) | Results and code |
-| --- | --- | --- | --- |
-| 1 rollout | ___ | ___ | [LINK] |
-| 3 rollouts | ___ | ___ | [LINK] |
-| 5 rollouts | ___ | ___ | [LINK] |
-
-**Budget construction:** [SAVED CHECKPOINTS / SEPARATE DEVELOPMENT RUNS]
-
-For each budget, link the usage log and frozen code revision and add a matching
-audit below. A saved checkpoint for budget R must be frozen before **any** task's
-(R+1)th start, so components shared across tasks cannot carry later experience.
-Test outcomes cannot select checkpoints.
+| Suite | Task | `Interaction-only` | `Hybrid` |
+| --- | --- | ---: | ---: |
+| Counting | BinFill | ___/50 (___%) | ___/50 (___%) |
+| Counting | PickXtimes | ___/50 (___%) | ___/50 (___%) |
+| Counting | SwingXtimes | ___/50 (___%) | ___/50 (___%) |
+| Counting | StopCube | ___/50 (___%) | ___/50 (___%) |
+| Permanence | VideoUnmask | ___/50 (___%) | ___/50 (___%) |
+| Permanence | VideoUnmaskSwap | ___/50 (___%) | ___/50 (___%) |
+| Permanence | ButtonUnmask | ___/50 (___%) | ___/50 (___%) |
+| Permanence | ButtonUnmaskSwap | ___/50 (___%) | ___/50 (___%) |
+| Reference | PickHighlight | ___/50 (___%) | ___/50 (___%) |
+| Reference | VideoRepick | ___/50 (___%) | ___/50 (___%) |
+| Reference | VideoPlaceButton | ___/50 (___%) | ___/50 (___%) |
+| Reference | VideoPlaceOrder | ___/50 (___%) | ___/50 (___%) |
+| Imitation | MoveCube | ___/50 (___%) | ___/50 (___%) |
+| Imitation | InsertPeg | ___/50 (___%) | ___/50 (___%) |
+| Imitation | PatternLock | ___/50 (___%) | ___/50 (___%) |
+| Imitation | RouteStick | ___/50 (___%) | ___/50 (___%) |
+| **Overall** | **All tasks** | **___/800 (___%)** | **___/800 (___%)** |
 
 </details>
 
+## Method details
 
-## 4. `demo&interaction`
-
-Adapt using released offline demonstrations and training-seed interactions.
-
-### [Model / framework name]
-
-[Briefly describe the model or agentic framework and its memory mechanism.]
-
-- **Track:** [Non-Agentic / Agentic]
-- **Paper:** [Paper](PAPER_URL) / N/A
-- **Website:** [Project website](WEBSITE_URL) / N/A
-- **Blog:** [Blog post](BLOG_URL) / N/A
-- **Code:** [Repository and frozen revision](CODE_URL)
-- **Development logs:** [Public archive](DEVELOPMENT_LOGS_URL) / N/A
-- **Model / version:** [CHECKPOINT OR API MODEL AND VERSION]
-- **Parameters (Non-Agentic track):** [SIZE IN B / N/A]
-- **Adaptation:** [BRIEF DESCRIPTION]
-- **Demo use:** [SELECTION AND MODALITIES]
-- **Usage log:** [LINK TO ATTEMPTS AND SIMULATOR STEPS PER TASK, BY BUDGET]
-- **Development API cost (USD):** 10 rollouts: [COST / N/A]
-- **Total evaluation API cost (USD):** 10 rollouts: [COST / N/A]
-
-| Suite | Task | Successes | Success with 10 rollouts (%) |
-| --- | --- | --- | --- |
-| Counting | BinFill |  |  |
-| Counting | PickXtimes |  |  |
-| Counting | SwingXtimes |  |  |
-| Counting | StopCube |  |  |
-| Permanence | VideoUnmask |  |  |
-| Permanence | VideoUnmaskSwap |  |  |
-| Permanence | ButtonUnmask |  |  |
-| Permanence | ButtonUnmaskSwap |  |  |
-| Reference | PickHighlight |  |  |
-| Reference | VideoRepick |  |  |
-| Reference | VideoPlaceButton |  |  |
-| Reference | VideoPlaceOrder |  |  |
-| Imitation | MoveCube |  |  |
-| Imitation | InsertPeg |  |  |
-| Imitation | PatternLock |  |  |
-| Imitation | RouteStick |  |  |
-| **Overall** | **All tasks** |  |  |
-
-
-<details>
-<summary>Optional results: 1, 3 and 5 rollouts per task</summary>
-
-Each budget evaluates all 800 tests. Report successes and success rates per task;
-use N/A for budgets you do not report.
-
-| Suite | Task | 1 rollout | 3 rollouts | 5 rollouts |
-| --- | --- | --- | --- | --- |
-| Counting | BinFill | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Counting | PickXtimes | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Counting | SwingXtimes | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Counting | StopCube | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Permanence | VideoUnmask | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Permanence | VideoUnmaskSwap | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Permanence | ButtonUnmask | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Permanence | ButtonUnmaskSwap | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Reference | PickHighlight | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Reference | VideoRepick | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Reference | VideoPlaceButton | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Reference | VideoPlaceOrder | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Imitation | MoveCube | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Imitation | InsertPeg | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Imitation | PatternLock | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| Imitation | RouteStick | ___/50 (___%) | ___/50 (___%) | ___/50 (___%) |
-| **Overall** | **All tasks** | **___/800 (___%)** | **___/800 (___%)** | **___/800 (___%)** |
-
-| Budget per task | Development API cost (USD) | Evaluation API cost (USD) | Results and code |
-| --- | --- | --- | --- |
-| 1 rollout | ___ | ___ | [LINK] |
-| 3 rollouts | ___ | ___ | [LINK] |
-| 5 rollouts | ___ | ___ | [LINK] |
-
-**Budget construction:** [SAVED CHECKPOINTS / SEPARATE DEVELOPMENT RUNS]
-
-For each budget, link the usage log and frozen code revision and add a matching
-audit below. A saved checkpoint for budget R must be frozen before **any** task's
-(R+1)th start, so components shared across tasks cannot carry later experience.
-Test outcomes cannot select checkpoints.
-
-</details>
-
+- **Action space:** [`joint_angle` / `ee_pose` / `waypoint`].
+- **Demo use:** [DEMONSTRATIONS AND MODALITIES USED, PER SETTING / NONE].
+- **Training and adaptation:** [WHAT WAS TRAINED, PROMPTED OR DEVELOPED ON PLUS / NONE].
+- **Inference:** [SAMPLING, CHUNKING, CONTEXT AND OTHER TEST-TIME SETTINGS].
+- **Rollout usage:** [LINK TO PER-TASK SIMULATOR STARTS; ONLY FOR NON-AGENTIC METHODS THAT USE PLUS ROLLOUTS]
 
 ## Agentic development audit record
 
-Keep this section at the **bottom of your submission**, one per setting and
-budget. [How to audit](../auditing.md) gives the procedure and prompts; full
-report links are optional.
+Auditor: [ASSISTANT MODEL AND VERSION], [DATE] ([SELF-REVIEW / INDEPENDENT]).
 
-| Audit | Conclusion | Summary |
-| --- | --- | --- |
-| Development harness | [PASS / FAIL / PENDING] | [ONE LINE; REASON FOR ANY FAIL] |
-| Development logs | [PASS / FAIL / PENDING] | [ONE LINE; REASON FOR ANY FAIL] |
+### Audit summary
 
-- **Scope:** [METHOD, SETTING, BUDGET, TASKS AND RUN ID]
-- **Versions:** [BENCHMARK/PROTOCOL, TRAINING DATA AND HARNESS REVISIONS]
-- **Frozen policy:** [CODE LINK AND FREEZE MANIFEST HASHES]
-- **Development logs:** [PUBLIC ARCHIVE LINK]
-- **Auditor / date:** [NAME OR ASSISTANT MODEL AND VERSION, DATE; SELF-REVIEW OR INDEPENDENT]
-- **Coverage:** [RECORDS INSPECTED; OMITTED PAYLOADS AND ANY ADDITIONAL LOCAL EVIDENCE]
-- **Agent-visible documentation:** [FILES AND REVISIONS FROM THE PROTOCOL'S ALLOWLIST]
+| Setting | Budget per task | Development starts | 1. No forbidden information | 2. Rollout budget | 3. No test-time optimization | Conclusion |
+| --- | ---: | ---: | --- | --- | --- | --- |
+| `Demo-only` | 0 | 0 | [PASS / FAIL] | [PASS / FAIL] | [PASS / FAIL] | **[PASS / FAIL]** |
+| `Interaction-only` | 10 | [STARTS] | [PASS / FAIL] | [PASS / FAIL] | [PASS / FAIL] | **[PASS / FAIL]** |
+| `Hybrid` | 10 | [STARTS] | [PASS / FAIL] | [PASS / FAIL] | [PASS / FAIL] | **[PASS / FAIL]** |
 
-Each audit concludes **PASS** only if H1–H7 and R1–R3 are PASS or N/A with a reason;
-any FAIL or GAP blocks PASS. Distinguish breaches from missing evidence.
-Check `[x]` only when an item passes in both audits.
-The [hard requirements](../auditing.md#hard-requirements) define H1–H7; the
-skills give the checks.
+### Development starts per task
 
-### Hard requirements
+| Suite | Task | `Demo-only` starts | `Interaction-only` starts | `Hybrid` starts |
+| --- | --- | ---: | ---: | ---: |
+| Counting | BinFill | [STARTS] | [STARTS] | [STARTS] |
+| Counting | PickXtimes | [STARTS] | [STARTS] | [STARTS] |
+| Counting | SwingXtimes | [STARTS] | [STARTS] | [STARTS] |
+| Counting | StopCube | [STARTS] | [STARTS] | [STARTS] |
+| Permanence | VideoUnmask | [STARTS] | [STARTS] | [STARTS] |
+| Permanence | VideoUnmaskSwap | [STARTS] | [STARTS] | [STARTS] |
+| Permanence | ButtonUnmask | [STARTS] | [STARTS] | [STARTS] |
+| Permanence | ButtonUnmaskSwap | [STARTS] | [STARTS] | [STARTS] |
+| Reference | PickHighlight | [STARTS] | [STARTS] | [STARTS] |
+| Reference | VideoRepick | [STARTS] | [STARTS] | [STARTS] |
+| Reference | VideoPlaceButton | [STARTS] | [STARTS] | [STARTS] |
+| Reference | VideoPlaceOrder | [STARTS] | [STARTS] | [STARTS] |
+| Imitation | MoveCube | [STARTS] | [STARTS] | [STARTS] |
+| Imitation | InsertPeg | [STARTS] | [STARTS] | [STARTS] |
+| Imitation | PatternLock | [STARTS] | [STARTS] | [STARTS] |
+| Imitation | RouteStick | [STARTS] | [STARTS] | [STARTS] |
+| **Total** | **All tasks** | **[TOTAL]** | **[TOTAL]** | **[TOTAL]** |
 
-- [ ] **H1 — No privileged information** · Harness: [PASS/FAIL] · Logs: [PASS/FAIL] · Evidence: [REFS]
-- [ ] **H2 — No Plus task code or other methods' Plus solutions** · Harness: [PASS/FAIL] · Logs: [PASS/FAIL] · Evidence: [REFS]
-- [ ] **H3 — No task-code details in prompts, skills or notes** · Harness: [PASS/FAIL] · Logs: [PASS/FAIL] · Evidence: [REFS]
-- [ ] **H4 — Training seeds only; no test seeds, metadata or results** · Harness: [PASS/FAIL] · Logs: [PASS/FAIL] · Evidence: [REFS]
-- [ ] **H5 — At most the rollout budget per task, every start counted** · Harness: [PASS/FAIL] · Logs: [PASS/FAIL] · Evidence: [REFS]
-- [ ] **H6 — Demonstrations only in demo settings** · Harness: [PASS/FAIL] · Logs: [PASS/FAIL] · Evidence: [REFS]
-- [ ] **H7 — Frozen before testing; no test-feedback tuning** · Harness: [PASS/FAIL] · Logs: [PASS/FAIL] · Evidence: [REFS]
+### Full audit reports
 
-### Required evidence
+<details>
+<summary><code>[SETTING]</code> · [BUDGET] — [PASS / FAIL]</summary>
 
-A GAP makes the audit FAIL. Development trajectories, images and videos are
-optional uploads; retain source/hash references when omitting them.
+[PASTE THE FULL AUDIT REPORT FOR THIS SETTING AND BUDGET]
 
-- [ ] **R1 — Complete logs and code history** · Harness: [PASS/GAP] · Logs: [PASS/GAP] · Evidence: [REFS]
-- [ ] **R2 — Resource usage recorded and reconciled** · Harness: [PASS/GAP] · Logs: [PASS/GAP] · Evidence: [REFS]
-- [ ] **R3 — Human corrections disclosed with diffs** · Harness: [PASS/GAP/N/A] · Logs: [PASS/GAP/N/A] · Evidence: [REFS]
+</details>
 
-### Per-task accounting
+## Citations
 
-Include every task in scope for each reported budget. Use Unknown for unavailable
-counts rather than zero. Failed/incomplete starts are included in Starts.
-
-| Task | Budget | Starts | Failed/incomplete starts | Steps | Seed validity | Status |
-| --- | --- | --- | --- | --- | --- | --- |
-| [TASK] | [LIMIT] | [COUNT] | [COUNT] | [COUNT / UNKNOWN] | [STATUS] | [STATUS] |
-
-### Warnings and required action
-
-| Finding | Affected tasks/settings | Evidence | Required action |
-| --- | --- | --- | --- |
-| [FAIL, GAP OR DISCLOSED CORRECTION; NONE IF NONE] | [SCOPE] | [REFERENCE] | [ACTION] |
+- [CITATIONS]
